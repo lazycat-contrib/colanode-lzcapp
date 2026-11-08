@@ -11,13 +11,6 @@ params:
     description: "Valkey(Redis) 访问密码（已预置随机值，应用自动使用）"
     default_value: "tG7wCu3jNi9pLa6f"
     optional: false
-  - id: web_domain
-    type: string
-    name: "Web 访问域名"
-    description: "本应用对外访问域名（浏览器地址栏中的域名，不带 https:// 与末尾斜杠），用于服务端生成正确的对外链接"
-    default_value: "colanode.你的域名.com"
-    optional: false
-
 locales:
   zh:
     cn_db_pw:
@@ -26,9 +19,6 @@ locales:
     cn_valkey_pw:
       name: "Valkey 密码"
       description: "Valkey(Redis) 访问密码（已预置随机值，应用自动使用）"
-    web_domain:
-      name: "Web 访问域名"
-      description: "本应用对外访问域名（浏览器地址栏中的域名，不带 https:// 与末尾斜杠），用于服务端生成正确的对外链接"
   en:
     cn_db_pw:
       name: "Database password"
@@ -36,6 +26,3 @@ locales:
     cn_valkey_pw:
       name: "Valkey password"
       description: "Valkey (Redis) access password (pre-filled with a random value, used automatically)"
-    web_domain:
-      name: "Web domain"
-      description: "Public domain of this app (as shown in the browser address bar, without https:// or trailing slash), used by the server to generate external links"

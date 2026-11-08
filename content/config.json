@@ -1,0 +1,34 @@
+{
+  "name": "Colanode",
+  "cors": {
+    "origin": true,
+    "maxAge": 7200
+  },
+  "account": {
+    "verificationType": "automatic",
+    "google": {
+      "enabled": false
+    }
+  },
+  "postgres": {
+    "url": "env://POSTGRES_URL"
+  },
+  "redis": {
+    "url": "env://REDIS_URL"
+  },
+  "storage": {
+    "provider": {
+      "type": "file",
+      "directory": "/lzcapp/var/storage"
+    }
+  },
+  "email": {
+    "enabled": false
+  },
+  "workspace": {
+    "maxFileSize": "524288000"
+  },
+  "logging": {
+    "level": "info"
+  }
+}

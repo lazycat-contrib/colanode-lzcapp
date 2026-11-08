@@ -8,6 +8,11 @@ application:
   upstreams:
     - location: /package-licenses/
       backend: file:///lzcapp/pkg/content/licenses/
+    # server API — 同源直连，SPA 通过 /config 与 /client/v1 访问（server-service.ts 拼法）
+    - location: /client/
+      backend: http://colanode-server:3000/
+    - location: /config
+      backend: http://colanode-server:3000/config
     - location: /
       backend: http://colanode-web:80/
 
@@ -23,12 +28,12 @@ services:
     image: ghcr.1ms.run/colanode/server:0.4.7
     environment:
       - NODE_ENV=production
-      - CONFIG=/lzcapp/run/config.json
+      - CONFIG=/lzcapp/pkg/config.json
       - POSTGRES_URL=postgres://colanode:{{PASSWORD_cn_db_pw}}@colanode-db:5432/colanode
       - REDIS_URL=redis://:{{PASSWORD_cn_valkey_pw}}@colanode-valkey:6379/0
-      - CN_WEB_DOMAIN={{ .U.web_domain }}
-    command: ["/bin/sh", "-c", "mkdir -p /lzcapp/run && cp /dev/null /lzcapp/run/config.json && echo \x27{\"name\":\"Colanode\",\"web\":{\"domain\":\"\"\x27\"\x27\"\x27\"\x27\",\"protocol\":\"https\"},\"cors\":{\"origin\":true,\"maxAge\":7200},\"account\":{\"verificationType\":\"automatic\",\"google\":{\"enabled\":false}},\"postgres\":{\"url\":\"env://POSTGRES_URL\"},\"redis\":{\"url\":\"env://REDIS_URL\"},\"storage\":{\"provider\":{\"type\":\"file\",\"directory\":\"/lzcapp/var/storage\"}},\"email\":{\"enabled\":false},\"workspace\":{\"maxFileSize\":\"524288000\"},\"logging\":{\"level\":\"info\"}}\x27 > /lzcapp/run/config.json && exec node apps/server/dist/index.js"]
+    command: ["node", "apps/server/dist/index.js"]
     binds:
+      - /lzcapp/pkg/content/config.json:/lzcapp/pkg/config.json:ro
       - /lzcapp/var/storage:/lzcapp/var/storage
     depends_on:
       - colanode-db
@@ -62,8 +67,8 @@ usage: |
   支持富文本、数据库、看板，端到端同步，官方服务器可完全自托管。
 
   使用方法：
-  1. 打开应用后点击 Add a server，输入本应用的访问地址（浏览器地址栏中的地址，
-     https:// 开头）即可连接到内置服务器。
+  1. 打开应用后点击 Add a server，输入本应用的访问地址
+     （即浏览器地址栏中的 https://… 地址）即可连接到内置服务器。
   2. 在登录页注册账号即可使用（免邮件验证）。
   3. 数据与上传文件存放在 /lzcapp/var/{database,storage,valkey}，
      升级或迁移时请备份这些目录。
