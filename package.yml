@@ -1,0 +1,18 @@
+package: community.lazycat.app.colanode
+name: Colanode
+version: 0.4.7
+description: "Open-source, local-first collaborative workspace with rich-text, databases and kanban boards."
+min_os_version: "1.5.0"
+homepage: https://colanode.com
+author: colanode
+license: Apache-2.0
+permissions:
+  required:
+    - net.internet
+locales:
+  zh:
+    name: Colanode
+    description: "开源本地优先协同工作区：富文本、数据库、看板，可完全自托管服务器。"
+  en:
+    name: Colanode
+    description: "Open-source, local-first collaborative workspace with rich-text, databases and kanban boards."

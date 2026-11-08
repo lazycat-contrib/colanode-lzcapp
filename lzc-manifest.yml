@@ -1,0 +1,73 @@
+application:
+  subdomain: colanode
+  multi_instance: false
+  # 注册/登录依赖邮件开关默认关闭（verificationType automatic，免邮件验证，自助建号），
+  # 按 papra 判例加 public_path，由应用自身页面鉴权。
+  public_path:
+    - /
+  upstreams:
+    - location: /package-licenses/
+      backend: file:///lzcapp/pkg/content/licenses/
+    - location: /
+      backend: http://colanode-web:80/
+
+services:
+  colanode-web:
+    # upstream: ghcr.io/colanode/web:0.4.7
+    image: ghcr.1ms.run/colanode/web:0.4.7
+    depends_on:
+      - colanode-server
+
+  colanode-server:
+    # upstream: ghcr.io/colanode/server:0.4.7
+    image: ghcr.1ms.run/colanode/server:0.4.7
+    environment:
+      - NODE_ENV=production
+      - CONFIG=/lzcapp/run/config.json
+      - POSTGRES_URL=postgres://colanode:{{PASSWORD_cn_db_pw}}@colanode-db:5432/colanode
+      - REDIS_URL=redis://:{{PASSWORD_cn_valkey_pw}}@colanode-valkey:6379/0
+      - CN_WEB_DOMAIN={{ .U.web_domain }}
+    command: ["/bin/sh", "-c", "mkdir -p /lzcapp/run && cp /dev/null /lzcapp/run/config.json && echo \x27{\"name\":\"Colanode\",\"web\":{\"domain\":\"\"\x27\"\x27\"\x27\"\x27\",\"protocol\":\"https\"},\"cors\":{\"origin\":true,\"maxAge\":7200},\"account\":{\"verificationType\":\"automatic\",\"google\":{\"enabled\":false}},\"postgres\":{\"url\":\"env://POSTGRES_URL\"},\"redis\":{\"url\":\"env://REDIS_URL\"},\"storage\":{\"provider\":{\"type\":\"file\",\"directory\":\"/lzcapp/var/storage\"}},\"email\":{\"enabled\":false},\"workspace\":{\"maxFileSize\":\"524288000\"},\"logging\":{\"level\":\"info\"}}\x27 > /lzcapp/run/config.json && exec node apps/server/dist/index.js"]
+    binds:
+      - /lzcapp/var/storage:/lzcapp/var/storage
+    depends_on:
+      - colanode-db
+      - colanode-valkey
+
+  colanode-db:
+    # upstream: pgvector/pgvector:0.8.7-pg17
+    image: docker.1ms.run/pgvector/pgvector:0.8.7-pg17
+    environment:
+      - POSTGRES_USER=colanode
+      - POSTGRES_PASSWORD={{PASSWORD_cn_db_pw}}
+      - POSTGRES_DB=colanode
+    binds:
+      - /lzcapp/var/database:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U colanode || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  colanode-valkey:
+    # upstream: valkey/valkey:8.1.11
+    image: docker.1ms.run/valkey/valkey:8.1.11
+    command: ["valkey-server", "--requirepass", "{{PASSWORD_cn_valkey_pw}}"]
+    binds:
+      - /lzcapp/var/valkey:/data
+
+usage: |
+  Colanode 是开源的本地优先协同工作区（Notion/Airtable 替代品），
+  支持富文本、数据库、看板，端到端同步，官方服务器可完全自托管。
+
+  使用方法：
+  1. 打开应用后点击 Add a server，输入本应用的访问地址（浏览器地址栏中的地址，
+     https:// 开头）即可连接到内置服务器。
+  2. 在登录页注册账号即可使用（免邮件验证）。
+  3. 数据与上传文件存放在 /lzcapp/var/{database,storage,valkey}，
+     升级或迁移时请备份这些目录。
+
+  说明：
+  - 本包未做实机验证，功能以官方文档为准：https://colanode.com/docs/self-hosting
+  - 本包按 Apache-2.0 许可分发（详见 /package-licenses/ 中的 LICENSE）。

@@ -1,0 +1,69 @@
+version: 1
+project:
+  root: .
+  build_config: lzc-build.yml
+  package_file: package.yml
+  output: dist/application.lpk
+  target_arch: amd64
+update:
+  strategy: publish
+  allow_downgrade: false
+  version_source:
+    type: image
+    image: server
+build:
+  toolchains: []
+  run_buildscript: false
+images:
+  - id: server
+    target: service
+    service: colanode-server
+    source: ghcr.io/colanode/server
+    channel: stable
+    sort: semver
+    tag_regex: ^[0-9]+[.][0-9]+[.][0-9]+$
+    delivery:
+      mode: mirror
+      require_digest_match: true
+  - id: web
+    target: service
+    service: colanode-web
+    source: ghcr.io/colanode/web
+    channel: stable
+    sort: semver
+    tag_regex: ^[0-9]+[.][0-9]+[.][0-9]+$
+    delivery:
+      mode: mirror
+      require_digest_match: true
+  - id: pgvector
+    target: service
+    service: colanode-db
+    source: pgvector/pgvector
+    channel: custom
+    sort: semver
+    tag_regex: ^0[.][0-9]+[.][0-9]+-pg17$
+    version_regex: ^(?P<version>0[.][0-9]+[.][0-9]+)-pg17$
+    version_template: "{version}"
+    delivery:
+      mode: mirror
+      require_digest_match: true
+  - id: valkey
+    target: service
+    service: colanode-valkey
+    source: library/valkey
+    channel: stable
+    sort: semver
+    tag_regex: ^8[.]1[.][0-9]+$
+    delivery:
+      mode: mirror
+      require_digest_match: true
+release:
+  use_github_release_notes: true
+  store_changelog_format: plain
+stores:
+  official:
+    enabled: false
+  private:
+    enabled: false
+    name: colanode
+    skip_if_version_exists: true
