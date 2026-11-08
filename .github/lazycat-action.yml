@@ -47,13 +47,17 @@ images:
     delivery:
       mode: mirror
       require_digest_match: true
+  # valkey/valkey is the real repo name on Docker Hub (library/valkey does not resolve in the Action);
+  # pin to 8.1.x three-segment tags
   - id: valkey
     target: service
     service: colanode-valkey
-    source: library/valkey
-    channel: stable
+    source: valkey/valkey
+    channel: custom
     sort: semver
     tag_regex: ^8[.]1[.][0-9]+$
+    version_regex: ^(?P<version>8[.]1[.][0-9]+)$
+    version_template: "{version}"
     delivery:
       mode: mirror
       require_digest_match: true
